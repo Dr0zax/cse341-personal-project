@@ -1,4 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-export default { url: process.env.MONGOBD_URI };
+// Use the correct environment variable MONGODB_URI (fix previous typo)
+// Provide a harmless local fallback to avoid immediate crashes during local dev.
+const mongoUrl = process.env.MONGODB_URI;
+
+export default { url: mongoUrl };

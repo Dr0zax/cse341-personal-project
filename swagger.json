@@ -5,11 +5,7 @@
     "description": "This is the API documentation for my application.",
     "version": "1.0.0"
   },
-  "host": "localhost:8080",
-  "basePath": "/",
-  "schemes": [
-    "http"
-  ],
+  
   "paths": {
     "/users/": {
       "get": {
