@@ -5,18 +5,13 @@
     "description": "This is the API documentation for my application.",
     "version": "1.0.0"
   },
-  "host": "localhost:8080",
-  "servers": [
-    {
-      "url": "https://cse341-personal-project-q24l.onrender.com"
-    }
-  ],
+  "host": "cse341-personal-project-q24l.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
-    "/swagger.json": {
+    "/api-docs": {
       "get": {
         "description": "",
         "responses": {
