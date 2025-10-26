@@ -1,15 +1,16 @@
 import swaggerAutogen from 'swagger-autogen';
 
 const doc = {
-  info: {
-    title: 'API Documentation',
-    description: 'This is the API documentation for my application.'
-  },
-  servers: [
-    {
-      url: 'https://cse341-personal-project-q24l.onrender.com',
-    }
-  ] ,
+    info: {
+        title: 'API Documentation',
+        description: 'This is the API documentation for my application.'
+    },
+    host: 'localhost:8080',
+    servers: [
+        {
+            url: 'https://cse341-personal-project-q24l.onrender.com'
+        }
+    ]
 };
 
 const outputFile = './swagger.json';

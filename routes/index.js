@@ -10,21 +10,24 @@ const swaggerDocument = JSON.parse(readFileSync('./swagger.json'));
 // fetches the spec from this server rather than obeying any hard-coded
 // external servers declared in the spec (which can cause NetworkError/CORS).
 router.get('/swagger.json', (req, res) => {
-	res.json(swaggerDocument);
+    res.json(swaggerDocument);
 });
 
 router.use('/api-docs', swaggerUi.serve);
 // Configure swagger-ui to fetch the spec from our local /swagger.json URL.
 router.use(
-	'/api-docs',
-	swaggerUi.setup(null, {
-		swaggerOptions: {
-			url: '/swagger.json'
-		}
-	})
+    '/api-docs',
+    swaggerUi.setup(null, {
+        swaggerOptions: {
+            url: '/swagger.json'
+        }
+    })
 );
 
 import userRoute from './user.js';
 router.use('/users', userRoute);
+
+import taskRoute from './task.js';
+router.use('/tasks', taskRoute);
 
 export default router;
