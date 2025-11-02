@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import db from '../models/index.js';
 import { validate } from '../utils/validator.js';
 const User = db.user;
@@ -19,7 +20,12 @@ const create = async (req, res) => {
             });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = new User(req.body);
+        user.password = hashedPassword;
+        user.email = req.body.email;
+        user.name = req.body.name;
         user.save()
             .then((data) => {
                 console.log(data);
@@ -39,7 +45,7 @@ const create = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        User.find()
+        User.find({})
             .then((users) => {
                 res.status(200).send(users);
             })
@@ -81,59 +87,69 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const username = req.params.username;
-        if (!username) {
-            return res.status(400).send({
-                message: 'Username is required'
-            });
-        }
-        const password = req.body.password;
-        const passwordCheck = validate(password);
+        const { username } = req.params;
+        const { password, newPassword, email, name } = req.body;
 
-        if (!passwordCheck.valid) {
-            return res.status(400).send({
-                message: passwordCheck.message
-            });
+        if (!username || !password) {
+            return res.status(400).send({ message: 'Username and password are required' });
         }
 
-        User.findOne({ username: username })
-            .then((user) => {
-                if (!user) {
-                    return res.satus(400).send({ message: 'user not found' });
-                }
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
 
-                user.username = req.body.username;
-                user.password = req.body.password;
-                user.email = req.body.email;
-                user.name = req.body.name;
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).send({ message: 'Invalid username or password' });
+        }
 
-                return user.save();
-            })
-            .then(() => {
-                res.status(204).send();
-            })
-            .catch((err) => {
-                res.status(500).send();
-            });
+        if (req.body.username) user.username = req.body.username;
+        if (req.body.email) user.email = req.body.email;
+        if (req.body.name) user.name = req.body.name;
+
+        if (newPassword) {
+            const passwordCheck = validate(newPassword);
+            if (!passwordCheck.valid) {
+                return res.status(400).send({ message: passwordCheck.message });
+            }
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        await user.save();
+        res.status(200).send({ message: 'User updated successfully' });
+
     } catch (err) {
-        res.status(500).send({
-            message: err.message
-        });
+        console.error(err);
+        res.status(500).send({ message: 'Server error' });
     }
 };
 
 const deleteUser = async (req, res) => {
     try {
-        const username = req.params.username;
-        if (!username) {
+        const { username } = req.params;
+        const { password } = req.body;
+        
+        if (!username || !password) {
             return res.status(400).send({
-                message: 'Username is required'
+                message: 'Username and password is required to delete user'
             });
         }
 
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).send({ message: 'Invalid username or password' });
+        }
+
+
         User.deleteOne({ username: username })
             .then(() => {
-                res.status(200).send();
+                res.status(200).send({ message: "User deleted successfully"});
             })
             .catch((err) => {
                 res.status(500).send();

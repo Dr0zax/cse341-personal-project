@@ -9,12 +9,7 @@ const create = async (req, res) => {
         });
         }
 
-        const userId = req.body.userId;
-        const title = req.body.title;
-        const description = req.body.description;
-        const dueDate = req.body.dueDate;
-        const priority = req.body.priority;
-        const status = req.body.status;
+        const { userId, title, description, dueDate, priority, satuts } = req.body;
 
         const task = new Task(req.body);
         task.save()
@@ -56,14 +51,15 @@ const getAllTasks = async (req, res) => {
 
 const getTask = async (req, res) => {
   try {
-    const id = req.params.id;
-    const userId = req.query.userId || req.body.userId;
+    const { id } = req.params;
+    const { userId } = req.query;
     if (!userId) {
       return res.status(400).send({
         message: 'userId is required'
       });
     }
-    Task.findOne({ _id: id, userId: userId })
+
+    Task.findOne({ _id: id, userId })
       .then((task) => {
         if (!task) {
           return res.status(404).send({
@@ -86,36 +82,30 @@ const getTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
+    const userId = req.query.userId;
+    const {title, description, dueDate, priority, status } = req.body;
+
     if (!id) {
         return res.status(400).send({
             message: 'id is required'
         });
     }
 
-    Task.findOne({ _id: id })
-      .then((task) => {
+    const task = await Task.findOne({ _id: id, userId: userId })
+    if (!task) {
+        return res.satus(400).send({ message: "task not found" });
+    }
 
-        if (!task) {
-          return res.satus(400).send({ message: "task not found" });
-        }
-
-        task.title = req.body.title;
-        task.description = req.body.description;
-        task.dueDate = req.body.dueDate;
-        task.priority = req.body.priority;
-        task.status = req.body.status;
+    if (req.body.title) task.title = req.body.title;
+    if (req.body.description) task.description = req.body.description;
+    if (req.body.dueDate) task.dueDate = req.body.dueDate;
+    if (req.body.priority) task.priority = req.body.priority;
+    if (req.body.status) task.status = req.body.status;
         
-        return task.save();
-      })
-      .then(() => {
-        res.status(204).send();
-      })
-      .catch((err) => {
-        res.status(500).send({
-            message: err.message
-        });
-      });
+    await task.save();
+      
+    res.status(204).send();
 
   } catch (err) {
     res.status(500).send({
