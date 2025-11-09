@@ -138,7 +138,6 @@ const updateTask = async (req, res) => {
     }
 
     const { id } = req.params;
-    const userId = req.query.userId;
     const {title, description, dueDate, priority, status } = req.body;
 
     if (!id) {
@@ -147,7 +146,7 @@ const updateTask = async (req, res) => {
         });
     }
 
-    const task = await Task.findOne({ _id: id, userId: userId })
+    const task = await Task.findOne({ _id: id })
     if (!task) {
         return res.satus(400).send({ message: "task not found" });
     }

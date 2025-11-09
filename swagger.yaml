@@ -83,10 +83,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: userId
-          in: query
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -103,10 +99,6 @@ paths:
         - name: id
           in: path
           required: true
-          schema:
-            type: string
-        - name: userId
-          in: query
           schema:
             type: string
       requestBody:
