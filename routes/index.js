@@ -28,9 +28,6 @@ router.use(
     swaggerUi.setup(swaggerDoc)
 );
 
-import userRoute from './user.js';
-router.use('/users', userRoute);
-
 import taskRoute from './task.js';
 router.use('/tasks', taskRoute);
 
