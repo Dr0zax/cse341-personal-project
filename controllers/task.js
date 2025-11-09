@@ -3,15 +3,25 @@ const Task = db.task;
 
 const create = async (req, res) => {
     try {
-        if (!req.body.userId) {
-            return res.status(400).send({
-            message: 'User id is required'
-        });
+        if (!req.oidc.isAuthenticated()) {
+          return res.status(401).send({
+            message: "unauthorized"
+          })
         }
 
-        const { userId, title, description, dueDate, priority, satuts } = req.body;
+        const userSub = req.oidc.user.sub;
+        const { title, description, dueDate, priority, status } = req.body;
 
-        const task = new Task(req.body);
+        const task = new Task({ 
+          userSub: userSub, 
+          title: title, 
+          description: 
+          description, 
+          dueDate: dueDate, 
+          priority: priority, 
+          status: status 
+        });
+
         task.save()
         .then((data) => {
             console.log(data)
@@ -32,6 +42,12 @@ const create = async (req, res) => {
 
 const getAllTasks = async (req, res) => {
     try {
+        if (!req.oidc.isAuthenticated()) {
+          return res.status(401).send({
+            message: "unauthorized"
+          })
+        }
+
         Task.find()
         .then((tasks) => {
             res.status(200).send(tasks);
@@ -49,17 +65,17 @@ const getAllTasks = async (req, res) => {
     }
 }
 
-const getTask = async (req, res) => {
+const getTasksByUserSub = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { userId } = req.query;
-    if (!userId) {
-      return res.status(400).send({
-        message: 'userId is required'
-      });
+    if (!req.oidc.isAuthenticated()) {
+          return res.status(401).send({
+            message: "unauthorized"
+      })
     }
 
-    Task.findOne({ _id: id, userId })
+    const { userSub } = req.oidc.user.sub;
+
+    Task.findOne({ userSub })
       .then((task) => {
         if (!task) {
           return res.status(404).send({
@@ -80,8 +96,47 @@ const getTask = async (req, res) => {
   }
 };
 
+const getTask = async (req, res) => {
+  try {
+    if (!req.oidc.isAuthenticated()) {
+          return res.status(401).send({
+            message: "unauthorized"
+      })
+    }
+
+    const { id } = req.params;
+
+    Task.findOne({ id: id })
+      .then((task) => {
+        if (!task) {
+          return res.status(404).send({
+            message: 'task not found for this user'
+          });
+        }
+        res.status(200).send(task);
+      })
+      .catch((err) => {
+        res.status(500).send({
+          message: err.message
+        });
+      });
+  } catch (err) {
+    res.status(500).send({
+      message: err.message
+    });
+  }
+};
+
+
+
 const updateTask = async (req, res) => {
   try {
+    if (!req.oidc.isAuthenticated()) {
+          return res.status(401).send({
+            message: "unauthorized"
+      })
+    }
+
     const { id } = req.params;
     const userId = req.query.userId;
     const {title, description, dueDate, priority, status } = req.body;
@@ -116,6 +171,11 @@ const updateTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
     try {
+      if (!req.oidc.isAuthenticated()) {
+          return res.status(401).send({
+            message: "unauthorized"
+        })
+      }
       const id = req.params.id;
         if (!id) {
             return res.status(400).send({
@@ -138,4 +198,4 @@ const deleteTask = async (req, res) => {
     }
   }
 
-export { create, getAllTasks, getTask, updateTask, deleteTask }
+export { create, getAllTasks, getTasksByUserSub, getTask, updateTask, deleteTask }

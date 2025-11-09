@@ -7,10 +7,29 @@ info:
 servers:
   - url: https://cse341-personal-project-q24l.onrender.com
     description: Production server
-  - url: http://localhost:8080
+  - url: http://localhost:3000
     description: Local development server
 
 paths:
+  /login:
+    get:
+      summary: Redirect to Auth0 login page
+      description: Initiates the Auth0 authentication process
+      responses:
+        '302':
+          description: Redirect to Auth0 login page
+        '500':
+          description: Internal Server Error
+  /logout:
+    get:
+      summary: Logout user
+      description: Logs out the user and clears the session
+      responses:
+        '302':
+          description: Redirect to home page
+        '500':
+          description: Internal Server Error
+
   /users/:
     get:
       summary: Get all users
@@ -138,12 +157,31 @@ paths:
         '500':
           description: Internal Server Error
 
+  /profile/:
+    get:
+      summary: Get the logged in user
+      responses:
+        '200':
+          description: The details of the logged in user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Internal Server Error
+
   /tasks/:
     get:
       summary: Get all tasks
       responses:
         '200':
-          description: OK
+          description: List of all tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
         '500':
           description: Internal Server Error
 
@@ -154,26 +192,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                userId:
-                  type: string
-                  example: any
-                title:
-                  type: string
-                  example: any
-                description:
-                  type: string
-                  example: any
-                dueDate:
-                  type: string
-                  example: any
-                priority:
-                  type: string
-                  example: any
-                status:
-                  type: string
-                  example: any
+              $ref: '#/components/schemas/Task'
       responses:
         '201':
           description: Created
@@ -268,14 +287,15 @@ components:
     User:
       type: object
       properties:
-        username:
-          type: string
-        password:
-          type: string
-        email: 
+        nickname:
           type: string
         name:
           type: string
+        picture:
+          type: url
+        email:
+          type: email
+        
     Task:
       type: object
       properties:
