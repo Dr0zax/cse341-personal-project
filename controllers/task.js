@@ -65,37 +65,6 @@ const getAllTasks = async (req, res) => {
     }
 }
 
-const getTasksByUserSub = async (req, res) => {
-  try {
-    if (!req.oidc.isAuthenticated()) {
-          return res.status(401).send({
-            message: "unauthorized"
-      })
-    }
-
-    const { userSub } = req.oidc.user.sub;
-
-    Task.findOne({ userSub })
-      .then((task) => {
-        if (!task) {
-          return res.status(404).send({
-            message: 'task not found for this user'
-          });
-        }
-        res.status(200).send(task);
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message: err.message
-        });
-      });
-  } catch (err) {
-    res.status(500).send({
-      message: err.message
-    });
-  }
-};
-
 const getTask = async (req, res) => {
   try {
     if (!req.oidc.isAuthenticated()) {
@@ -106,11 +75,11 @@ const getTask = async (req, res) => {
 
     const { id } = req.params;
 
-    Task.findOne({ id: id })
+    Task.findOne({ _id: id })
       .then((task) => {
         if (!task) {
           return res.status(404).send({
-            message: 'task not found for this user'
+            message: 'task not found'
           });
         }
         res.status(200).send(task);
@@ -197,4 +166,4 @@ const deleteTask = async (req, res) => {
     }
   }
 
-export { create, getAllTasks, getTasksByUserSub, getTask, updateTask, deleteTask }
+export { create, getAllTasks, getTask, updateTask, deleteTask }
