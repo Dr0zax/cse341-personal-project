@@ -160,8 +160,6 @@ components:
     Task:
       type: object
       properties:
-        userSub:
-          type: string
         title:
           type: string
         description:
